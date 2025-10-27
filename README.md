@@ -38,7 +38,7 @@ A modern, responsive web application for creating synchronized watch parties wit
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/ishmaelishrealm/IshrealmTV.git
    cd IshrealmTV
    ```
 
@@ -65,23 +65,30 @@ A modern, responsive web application for creating synchronized watch parties wit
 
 ```
 IshrealmTV/
-├── App.tsx                 # Main application component
-├── components/
-│   ├── ui/                # Reusable UI components (shadcn/ui)
-│   ├── HomePage.tsx       # Landing page with platform selection
-│   ├── CreateRoom.tsx     # Room creation interface
-│   ├── JoinRoom.tsx      # Room joining interface
-│   ├── WatchParty.tsx    # Main watch party interface
-│   ├── VideoPlayer.tsx   # Video player component
-│   ├── ChatBox.tsx       # Real-time chat component
-│   ├── RoomControls.tsx  # Host playback controls
-│   ├── Navbar.tsx        # Navigation component
-│   └── YouTubeDownloader.tsx # Video downloader (demo)
-├── styles/
-│   └── globals.css       # Global styles and CSS variables
-├── guidelines/
-│   └── Guidelines.md     # Development guidelines
-└── Attributions.md       # Third-party attributions
+├── src/
+│   ├── App.tsx                 # Main application component
+│   ├── main.tsx               # Application entry point
+│   ├── components/            # React components
+│   │   ├── ui/               # Reusable UI components (shadcn/ui)
+│   │   ├── HomePage.tsx      # Landing page with platform selection
+│   │   ├── CreateRoom.tsx    # Room creation interface
+│   │   ├── JoinRoom.tsx     # Room joining interface
+│   │   ├── WatchParty.tsx   # Main watch party interface
+│   │   ├── VideoPlayer.tsx  # Video player component
+│   │   ├── ChatBox.tsx      # Real-time chat component
+│   │   ├── RoomControls.tsx # Host playback controls
+│   │   ├── Navbar.tsx       # Navigation component
+│   │   └── YouTubeDownloader.tsx # Video downloader (demo)
+│   ├── lib/
+│   │   └── supabase.ts      # Supabase client configuration
+│   └── styles/
+│       └── globals.css      # Global styles and CSS variables
+├── public/                   # Static assets and PWA files
+├── .github/workflows/        # GitHub Actions for deployment
+├── README.md                # Project documentation
+├── DEPLOYMENT.md            # Complete deployment guide
+├── supabase-schema.sql      # Database setup
+└── vercel.json             # Vercel deployment configuration
 ```
 
 ## 🎮 How to Use
@@ -113,6 +120,9 @@ IshrealmTV/
 - **UI Components**: shadcn/ui component library
 - **Icons**: Lucide React
 - **State Management**: React useState hooks
+- **Backend**: Supabase (PostgreSQL + Real-time)
+- **Deployment**: Vercel
+- **PWA**: Vite PWA Plugin
 
 ### Key Components
 
@@ -164,8 +174,9 @@ IshrealmTV/
 ```bash
 npm run dev          # Start development server
 npm run build        # Build for production
-npm run start        # Start production server
+npm run preview      # Preview production build
 npm run lint         # Run ESLint
+npm run type-check   # Run TypeScript type checking
 ```
 
 ### Code Style
@@ -175,7 +186,7 @@ npm run lint         # Run ESLint
 - **Component Structure**: Functional components with hooks
 
 ### Adding New Features
-1. Create component in `components/` directory
+1. Create component in `src/components/` directory
 2. Add to main App.tsx routing
 3. Update TypeScript interfaces as needed
 4. Follow existing design patterns
@@ -195,6 +206,7 @@ npm run lint         # Run ESLint
 - **Mobile Menu**: Collapsible navigation
 - **Gesture Support**: Swipe and tap interactions
 - **Performance**: Optimized for mobile devices
+- **PWA Support**: Install as native app
 
 ## 🔮 Future Enhancements
 
@@ -237,12 +249,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Lucide**: Consistent icon library
 - **Unsplash**: High-quality background images
 - **React Team**: Amazing framework and ecosystem
+- **Supabase**: Backend-as-a-Service platform
+- **Vercel**: Deployment platform
 
 ## 📞 Support
 
 For support, questions, or feature requests:
 - Create an issue on GitHub
-- Contact: [Your Contact Information]
+- Contact: ishmaelxgaming@gmail.com
 
 ---
 
