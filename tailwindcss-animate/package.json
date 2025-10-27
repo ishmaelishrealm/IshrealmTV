@@ -1,0 +1,9 @@
+{
+  "name": "tailwindcss-animate",
+  "version": "1.0.7",
+  "description": "Tailwind CSS plugin for animations",
+  "main": "index.js",
+  "keywords": ["tailwindcss", "animation"],
+  "author": "Tailwind Labs",
+  "license": "MIT"
+}

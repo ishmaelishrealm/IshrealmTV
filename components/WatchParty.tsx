@@ -1,0 +1,157 @@
+import { useState, useEffect } from "react";
+import { Copy, Users, Crown, Check } from "lucide-react";
+import { Button } from "./ui/button";
+import { Card } from "./ui/card";
+import { Room } from "../App";
+import { VideoPlayer } from "./VideoPlayer";
+import { ChatBox } from "./ChatBox";
+import { RoomControls } from "./RoomControls";
+
+interface WatchPartyProps {
+  room: Room;
+  onLeaveRoom: () => void;
+}
+
+export interface VideoState {
+  playing: boolean;
+  currentTime: number;
+  duration: number;
+}
+
+export function WatchParty({ room }: WatchPartyProps) {
+  const [videoState, setVideoState] = useState<VideoState>({
+    playing: false,
+    currentTime: 0,
+    duration: 0,
+  });
+  const [copied, setCopied] = useState(false);
+  const [participants] = useState([
+    { id: "1", name: room.hostName, isHost: true },
+    { id: "2", name: "Alex", isHost: false },
+    { id: "3", name: "Jordan", isHost: false },
+  ]);
+
+  const copyRoomCode = () => {
+    navigator.clipboard.writeText(room.id);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  useEffect(() => {
+    // Simulate duration update
+    setVideoState((prev) => ({ ...prev, duration: 300 }));
+  }, []);
+
+  return (
+    <div className="relative z-10 min-h-[calc(100vh-73px)] p-3 md:p-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Room Header - Mobile Optimized */}
+        <div className="mb-3 md:mb-4 flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2 md:gap-4 w-full sm:w-auto">
+            <Card className="bg-black/40 border-pink-500/20 backdrop-blur-sm px-3 md:px-4 py-2">
+              <div className="flex items-center gap-2">
+                <span className="text-white/60 text-xs md:text-sm">Room:</span>
+                <span className="text-pink-300 tracking-wider text-xs md:text-base">{room.id}</span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={copyRoomCode}
+                  className="h-6 w-6 p-0 hover:bg-white/10"
+                >
+                  {copied ? (
+                    <Check className="w-3 h-3 text-green-400" />
+                  ) : (
+                    <Copy className="w-3 h-3" />
+                  )}
+                </Button>
+              </div>
+            </Card>
+
+            <Card className="bg-black/40 border-green-500/20 backdrop-blur-sm px-3 md:px-4 py-2">
+              <div className="flex items-center gap-2">
+                <Users className="w-3 h-3 md:w-4 md:h-4 text-green-300" />
+                <span className="text-white text-xs md:text-sm">{participants.length} watching</span>
+              </div>
+            </Card>
+          </div>
+        </div>
+
+        {/* Main Content - Stack on Mobile, Side-by-side on Desktop */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-3 md:gap-4">
+          {/* Video Section */}
+          <div className="space-y-3 md:space-y-4">
+            <VideoPlayer
+              room={room}
+              videoState={videoState}
+              onStateChange={setVideoState}
+              isHost={room.isHost}
+            />
+
+            {room.isHost && (
+              <RoomControls videoState={videoState} onStateChange={setVideoState} />
+            )}
+
+            {/* Participants - Hide on mobile, show on desktop */}
+            <Card className="hidden lg:block bg-black/40 border-pink-500/20 backdrop-blur-sm p-4">
+              <h3 className="text-white mb-3 flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Participants
+              </h3>
+              <div className="space-y-2">
+                {participants.map((participant) => (
+                  <div
+                    key={participant.id}
+                    className="flex items-center gap-3 p-2 rounded-lg bg-white/5"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-green-400 flex items-center justify-center text-white text-sm">
+                      {participant.name[0]}
+                    </div>
+                    <span className="text-white flex-1">{participant.name}</span>
+                    {participant.isHost && (
+                      <div className="flex items-center gap-1 px-2 py-1 bg-yellow-500/20 rounded text-xs text-yellow-300">
+                        <Crown className="w-3 h-3" />
+                        Host
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+
+          {/* Chat Section - Full height on mobile */}
+          <div className="lg:sticky lg:top-4 lg:self-start h-[400px] lg:h-auto">
+            <ChatBox roomId={room.id} />
+          </div>
+
+          {/* Participants on Mobile - Below chat */}
+          <Card className="lg:hidden bg-black/40 border-pink-500/20 backdrop-blur-sm p-4">
+            <h3 className="text-white mb-3 flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Participants
+            </h3>
+            <div className="space-y-2">
+              {participants.map((participant) => (
+                <div
+                  key={participant.id}
+                  className="flex items-center gap-3 p-2 rounded-lg bg-white/5"
+                >
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-green-400 flex items-center justify-center text-white text-sm">
+                    {participant.name[0]}
+                  </div>
+                  <span className="text-white flex-1">{participant.name}</span>
+                  {participant.isHost && (
+                    <div className="flex items-center gap-1 px-2 py-1 bg-yellow-500/20 rounded text-xs text-yellow-300">
+                      <Crown className="w-3 h-3" />
+                      Host
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
