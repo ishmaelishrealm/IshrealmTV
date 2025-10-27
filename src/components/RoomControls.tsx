@@ -100,7 +100,7 @@ export function RoomControls({ videoState, onStateChange }: RoomControlsProps) {
                 value={[muted ? 0 : volume]}
                 max={100}
                 step={1}
-                onValueChange={(value) => setVolume(value[0])}
+                onValueChange={(value: number[]) => setVolume(value[0])}
                 className="w-20 md:w-24"
               />
             </div>

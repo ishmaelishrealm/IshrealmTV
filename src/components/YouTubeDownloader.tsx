@@ -4,7 +4,6 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card } from "./ui/card";
 import { Alert, AlertDescription } from "./ui/alert";
-import { View } from "../App";
 
 interface YouTubeDownloaderProps {
   onBack: () => void;
