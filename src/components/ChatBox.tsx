@@ -157,40 +157,44 @@ export function ChatBox({ roomId }: ChatBoxProps) {
         </div>
       </ScrollArea>
 
-      {/* Quick Reactions */}
+      {/* Quick Reactions - Fully Responsive */}
       <div className="p-2 md:p-3 border-t border-white/10 bg-white/5">
-        <div className="flex gap-1 md:gap-2 justify-center">
+        <div className="flex gap-2 md:gap-3 justify-center items-center">
           <Button
             size="sm"
             variant="ghost"
-            onClick={() => sendReaction(<span className="text-2xl">❤️</span>)}
-            className="hover:bg-white/10 hover:scale-110 transition-transform h-9 w-9 md:h-10 md:w-10 p-0 text-base md:text-lg"
+            onClick={() => sendReaction(<span className="text-3xl md:text-4xl">❤️</span>)}
+            className="hover:bg-red-500/20 active:bg-red-500/30 hover:scale-110 active:scale-95 transition-all h-12 w-12 md:h-14 md:w-14 p-0 rounded-full border border-white/10 hover:border-red-500/40"
+            title="Send heart"
           >
-            ❤️
+            <span className="text-2xl md:text-3xl">❤️</span>
           </Button>
           <Button
             size="sm"
             variant="ghost"
-            onClick={() => sendReaction(<span className="text-2xl">😂</span>)}
-            className="hover:bg-white/10 hover:scale-110 transition-transform h-9 w-9 md:h-10 md:w-10 p-0 text-base md:text-lg"
+            onClick={() => sendReaction(<span className="text-3xl md:text-4xl">😂</span>)}
+            className="hover:bg-yellow-500/20 active:bg-yellow-500/30 hover:scale-110 active:scale-95 transition-all h-12 w-12 md:h-14 md:w-14 p-0 rounded-full border border-white/10 hover:border-yellow-500/40"
+            title="Send laugh"
           >
-            😂
+            <span className="text-2xl md:text-3xl">😂</span>
           </Button>
           <Button
             size="sm"
             variant="ghost"
-            onClick={() => sendReaction(<span className="text-2xl">👍</span>)}
-            className="hover:bg-white/10 hover:scale-110 transition-transform h-9 w-9 md:h-10 md:w-10 p-0 text-base md:text-lg"
+            onClick={() => sendReaction(<span className="text-3xl md:text-4xl">👍</span>)}
+            className="hover:bg-blue-500/20 active:bg-blue-500/30 hover:scale-110 active:scale-95 transition-all h-12 w-12 md:h-14 md:w-14 p-0 rounded-full border border-white/10 hover:border-blue-500/40"
+            title="Send thumbs up"
           >
-            👍
+            <span className="text-2xl md:text-3xl">👍</span>
           </Button>
           <Button
             size="sm"
             variant="ghost"
-            onClick={() => sendReaction(<span className="text-2xl">✨</span>)}
-            className="hover:bg-white/10 hover:scale-110 transition-transform h-9 w-9 md:h-10 md:w-10 p-0 text-base md:text-lg"
+            onClick={() => sendReaction(<span className="text-3xl md:text-4xl">✨</span>)}
+            className="hover:bg-purple-500/20 active:bg-purple-500/30 hover:scale-110 active:scale-95 transition-all h-12 w-12 md:h-14 md:w-14 p-0 rounded-full border border-white/10 hover:border-purple-500/40"
+            title="Send sparkles"
           >
-            ✨
+            <span className="text-2xl md:text-3xl">✨</span>
           </Button>
         </div>
       </div>
