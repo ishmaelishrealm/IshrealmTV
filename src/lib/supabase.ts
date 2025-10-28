@@ -54,7 +54,7 @@ export interface Message {
 export interface VideoState {
   room_id: string
   playing: boolean
-  current_time: number
+  video_time: number
   duration: number
   last_updated: string
 }
