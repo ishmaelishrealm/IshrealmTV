@@ -6,6 +6,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Room } from "../App";
 import { useAuth } from "../contexts/AuthContext";
+import { getRoom, joinRoom as joinRoomStorage } from "../lib/roomStorage";
 
 interface JoinRoomProps {
   onJoinRoom: (room: Room) => void;
@@ -29,16 +30,28 @@ export function JoinRoom({ onJoinRoom, onBack }: JoinRoomProps) {
       return;
     }
 
-    // Simulate joining a room - in real app, this would fetch room data
-    const mockRoom: Room = {
-      id: roomCode,
-      platform: "youtube",
-      url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      hostName: "Room Host",
+    // Fetch real room data from storage
+    const storedRoom = getRoom(roomCode);
+    
+    if (!storedRoom) {
+      alert(`Room ${roomCode} not found. Please check the room code and try again.`);
+      return;
+    }
+
+    // Join the room
+    joinRoomStorage(roomCode, userName);
+
+    // Create Room object for the app
+    const room: Room = {
+      id: storedRoom.id,
+      platform: storedRoom.platform,
+      url: storedRoom.url,
+      hostName: storedRoom.hostName,
       isHost: false,
+      localFile: storedRoom.localFile,
     };
 
-    onJoinRoom(mockRoom);
+    onJoinRoom(room);
   };
 
   const formatRoomCode = (value: string) => {

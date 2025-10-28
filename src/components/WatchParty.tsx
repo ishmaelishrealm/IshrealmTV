@@ -7,6 +7,13 @@ import { VideoPlayer } from "./VideoPlayer";
 import { ChatBox } from "./ChatBox";
 import { RoomControls } from "./RoomControls";
 import { useAuth } from "../contexts/AuthContext";
+import { 
+  updateVideoState as updateVideoStateStorage, 
+  getParticipants,
+  subscribeToRoom,
+  leaveRoom as leaveRoomStorage,
+  kickParticipant as kickParticipantStorage
+} from "../lib/roomStorage";
 
 interface WatchPartyProps {
   room: Room;
@@ -29,14 +36,35 @@ export function WatchParty({ room, onLeaveRoom }: WatchPartyProps) {
     playbackSpeed: 1,
   });
   const [copied, setCopied] = useState(false);
-  const [participants, setParticipants] = useState([
-    { id: "1", name: room.hostName, isHost: true },
-  ]);
+  const [participants, setParticipants] = useState<Array<{
+    id: string;
+    name: string;
+    isHost: boolean;
+  }>>([]);
   const [showGuestWarning, setShowGuestWarning] = useState(false);
 
-  const handleKickParticipant = (participantId: string) => {
+  // Handle video state changes (host only)
+  const handleVideoStateChange = (newState: VideoState) => {
+    setVideoState(newState);
+    
+    // Only host can update video state
+    if (room.isHost) {
+      updateVideoStateStorage(room.id, newState);
+    }
+  };
+
+  const handleKickParticipant = (participantId: string, participantName: string) => {
+    if (!room.isHost) return;
+    
+    kickParticipantStorage(room.id, participantName);
     setParticipants(prev => prev.filter(p => p.id !== participantId));
-    // TODO: In real implementation, send kick event via Supabase
+  };
+
+  // Clean up when leaving
+  const handleLeave = () => {
+    const userName = room.isHost ? room.hostName : 'Guest';
+    leaveRoomStorage(room.id, userName);
+    onLeaveRoom();
   };
 
   // Guest session expiry check - STRICT ENFORCEMENT
@@ -61,10 +89,46 @@ export function WatchParty({ room, onLeaveRoom }: WatchPartyProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Subscribe to room changes for real-time sync
   useEffect(() => {
-    // Simulate duration update
-    setVideoState((prev) => ({ ...prev, duration: 300 }));
-  }, []);
+    const unsubscribe = subscribeToRoom(room.id, (updatedRoom) => {
+      if (!updatedRoom) {
+        // Room was deleted
+        handleLeave();
+        return;
+      }
+
+      // Update participants
+      const participantList = updatedRoom.participants.map(p => ({
+        id: p.id,
+        name: p.name,
+        isHost: p.isHost,
+      }));
+      setParticipants(participantList);
+
+      // Sync video state (guests only - host controls it)
+      if (!room.isHost && updatedRoom.videoState) {
+        setVideoState({
+          playing: updatedRoom.videoState.playing,
+          currentTime: updatedRoom.videoState.currentTime,
+          duration: updatedRoom.videoState.duration,
+          playbackSpeed: updatedRoom.videoState.playbackSpeed,
+        });
+      }
+    });
+
+    // Load initial participants
+    const initialParticipants = getParticipants(room.id);
+    setParticipants(initialParticipants.map(p => ({
+      id: p.id,
+      name: p.name,
+      isHost: p.isHost,
+    })));
+
+    return () => {
+      unsubscribe();
+    };
+  }, [room.id, room.isHost]);
 
   return (
     <div className="relative z-10 min-h-[calc(100vh-73px)] p-3 md:p-4">
@@ -123,12 +187,12 @@ export function WatchParty({ room, onLeaveRoom }: WatchPartyProps) {
             <VideoPlayer
               room={room}
               videoState={videoState}
-              onStateChange={setVideoState}
+              onStateChange={handleVideoStateChange}
               isHost={room.isHost}
             />
 
             {room.isHost && (
-              <RoomControls videoState={videoState} onStateChange={setVideoState} />
+              <RoomControls videoState={videoState} onStateChange={handleVideoStateChange} />
             )}
 
             {/* Participants - Hide on mobile, show on desktop */}
@@ -156,7 +220,7 @@ export function WatchParty({ room, onLeaveRoom }: WatchPartyProps) {
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleKickParticipant(participant.id)}
+                        onClick={() => handleKickParticipant(participant.id, participant.name)}
                         className="h-7 w-7 p-0 hover:bg-red-500/20 hover:text-red-300"
                         title={`Kick ${participant.name}`}
                       >
@@ -199,7 +263,7 @@ export function WatchParty({ room, onLeaveRoom }: WatchPartyProps) {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleKickParticipant(participant.id)}
+                      onClick={() => handleKickParticipant(participant.id, participant.name)}
                       className="h-7 w-7 p-0 hover:bg-red-500/20 hover:text-red-300"
                       title={`Kick ${participant.name}`}
                     >

@@ -6,6 +6,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Room } from "../App";
 import { useAuth } from "../contexts/AuthContext";
+import { createRoom as storeRoom } from "../lib/roomStorage";
 
 interface CreateRoomProps {
   onCreateRoom: (room: Room) => void;
@@ -56,14 +57,19 @@ export function CreateRoom({ onCreateRoom, onBack }: CreateRoomProps) {
   const handleJoinCreatedRoom = () => {
     if (!roomCode || !platform || !url) return;
     
-    onCreateRoom({
+    const room: Room = {
       id: roomCode,
       platform,
       url,
       hostName,
       isHost: true,
       localFile: localFile || undefined,
-    });
+    };
+    
+    // Store room data for other participants to join
+    storeRoom(room);
+    
+    onCreateRoom(room);
   };
 
   const copyToClipboard = () => {
