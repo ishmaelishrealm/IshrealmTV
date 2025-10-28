@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "./components/Navbar";
 import { HomePage } from "./components/HomePage";
 import { CreateRoom } from "./components/CreateRoom";
 import { JoinRoom } from "./components/JoinRoom";
 import { WatchParty } from "./components/WatchParty";
 import { YouTubeDownloader } from "./components/YouTubeDownloader";
+import { AuthModal } from "./components/AuthModal";
+import { GuestTimer } from "./components/GuestTimer";
+import { useAuth } from "./contexts/AuthContext";
 
 export type View = "home" | "create" | "join" | "watch" | "downloader";
 
@@ -20,6 +23,16 @@ export interface Room {
 export default function App() {
   const [currentView, setCurrentView] = useState<View>("home");
   const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  
+  const { user, isGuest, loading } = useAuth();
+
+  // Show auth modal on first visit if not logged in
+  useEffect(() => {
+    if (!loading && !user && !isGuest) {
+      setShowAuthModal(true);
+    }
+  }, [loading, user, isGuest]);
 
   const handleCreateRoom = (room: Room) => {
     setCurrentRoom(room);
@@ -35,6 +48,18 @@ export default function App() {
     setCurrentRoom(null);
     setCurrentView("home");
   };
+
+  // Show loading while checking auth state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-white/60">Loading ISHREALM TV...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
@@ -95,6 +120,12 @@ export default function App() {
         <div className="absolute top-20 left-20 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 right-20 w-96 h-96 bg-green-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+
+      {/* Guest Timer */}
+      <GuestTimer />
     </div>
   );
 }
