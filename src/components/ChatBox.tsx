@@ -33,18 +33,6 @@ export function ChatBox({ roomId }: ChatBoxProps) {
       timestamp: new Date(),
       isSystem: true,
     },
-    {
-      id: "2",
-      userName: "Alex",
-      text: "Hey everyone! Ready to watch?",
-      timestamp: new Date(Date.now() - 60000),
-    },
-    {
-      id: "3",
-      userName: "Jordan",
-      text: "Yes! This is going to be awesome 🎉",
-      timestamp: new Date(Date.now() - 30000),
-    },
   ]);
   const [newMessage, setNewMessage] = useState("");
   const [reactions, setReactions] = useState<Reaction[]>([]);
