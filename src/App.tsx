@@ -63,16 +63,18 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
-      {/* Blurred cinema background */}
+      {/* Cinematic movie theater background */}
       <div className="fixed inset-0 z-0">
         <div 
-          className="absolute inset-0 bg-cover bg-center opacity-20 blur-md scale-110"
+          className="absolute inset-0 bg-cover bg-center opacity-25 blur-sm scale-110"
           style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1524712245354-2c4e5e7121c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb3ZpZSUyMHRoZWF0cmUlMjBjaW5lbWF8ZW58MXx8fHwxNzYxNTMwMDkxfDA&ixlib=rb-4.1.0&q=80&w=1080')`
+            backgroundImage: `url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070&auto=format&fit=crop')`
           }}
         />
-        {/* Gradient overlay for better contrast */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-black/95 to-pink-950/30" />
+        {/* Romantic gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-950/90 to-pink-950/80" />
+        {/* Soft vignette effect */}
+        <div className="absolute inset-0 bg-radial-gradient from-transparent via-black/30 to-black" />
       </div>
 
       <div className="relative z-10">
@@ -115,10 +117,12 @@ export default function App() {
         )}
       </div>
       
-      {/* Subtle animated accent elements */}
+      {/* Cinematic lighting effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-20 left-20 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-20 w-96 h-96 bg-green-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute top-20 left-20 w-96 h-96 bg-red-500/15 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-40 right-40 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-20 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute bottom-40 right-20 w-80 h-80 bg-rose-500/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
       </div>
 
       {/* Auth Modal */}
