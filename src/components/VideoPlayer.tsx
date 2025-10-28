@@ -1,8 +1,16 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card } from "./ui/card";
 import { Room } from "../App";
 import { VideoState } from "./WatchParty";
 import { Play, Pause, Volume2 } from "lucide-react";
+
+// Declare YouTube API types
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady: () => void;
+  }
+}
 
 interface VideoPlayerProps {
   room: Room;
@@ -13,6 +21,8 @@ interface VideoPlayerProps {
 
 export function VideoPlayer({ room, videoState, onStateChange, isHost }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const youtubePlayerRef = useRef<any>(null);
+  const [isYTReady, setIsYTReady] = useState(false);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -43,6 +53,97 @@ export function VideoPlayer({ room, videoState, onStateChange, isHost }: VideoPl
       videoRef.current.currentTime = targetTime;
     }
   }, [videoState.currentTime, isHost]);
+
+  // Initialize YouTube player
+  useEffect(() => {
+    if (room.platform !== "youtube") return;
+
+    const videoId = room.url.split("v=")[1]?.split("&")[0];
+    if (!videoId) return;
+
+    const initializePlayer = () => {
+      if (typeof window.YT === 'undefined' || !window.YT.Player) {
+        setTimeout(initializePlayer, 100);
+        return;
+      }
+
+      youtubePlayerRef.current = new window.YT.Player(`youtube-player-${room.id}`, {
+        height: '100%',
+        width: '100%',
+        videoId: videoId,
+        playerVars: {
+          controls: isHost ? 1 : 0,
+          enablejsapi: 1,
+          origin: window.location.origin,
+        },
+        events: {
+          onReady: () => {
+            setIsYTReady(true);
+          },
+          onStateChange: (event: any) => {
+            if (!isHost) return; // Only host updates state
+            
+            const player = youtubePlayerRef.current;
+            if (!player) return;
+
+            const playing = event.data === window.YT.PlayerState.PLAYING;
+            const currentTime = player.getCurrentTime() || 0;
+            const duration = player.getDuration() || 0;
+
+            onStateChange({
+              ...videoState,
+              playing,
+              currentTime,
+              duration,
+            });
+          },
+        },
+      });
+    };
+
+    initializePlayer();
+
+    return () => {
+      if (youtubePlayerRef.current && youtubePlayerRef.current.destroy) {
+        youtubePlayerRef.current.destroy();
+      }
+    };
+  }, [room.platform, room.url, room.id, isHost]);
+
+  // Control YouTube player based on videoState
+  useEffect(() => {
+    if (room.platform !== "youtube" || !isYTReady || !youtubePlayerRef.current) return;
+
+    const player = youtubePlayerRef.current;
+
+    try {
+      // Control play/pause
+      if (videoState.playing) {
+        if (player.getPlayerState() !== window.YT.PlayerState.PLAYING) {
+          player.playVideo();
+        }
+      } else {
+        if (player.getPlayerState() === window.YT.PlayerState.PLAYING) {
+          player.pauseVideo();
+        }
+      }
+
+      // Control playback speed
+      player.setPlaybackRate(videoState.playbackSpeed);
+
+      // Sync currentTime for guests (with tolerance)
+      if (!isHost) {
+        const currentTime = player.getCurrentTime() || 0;
+        const timeDiff = Math.abs(currentTime - videoState.currentTime);
+        
+        if (timeDiff > 2) {
+          player.seekTo(videoState.currentTime, true);
+        }
+      }
+    } catch (error) {
+      console.log('YouTube player control error:', error);
+    }
+  }, [videoState.playing, videoState.currentTime, videoState.playbackSpeed, isYTReady, room.platform, isHost]);
 
   const getEmbedUrl = () => {
     if (room.platform === "youtube") {
@@ -76,7 +177,9 @@ export function VideoPlayer({ room, videoState, onStateChange, isHost }: VideoPl
   return (
     <Card className="bg-black border-pink-500/20 overflow-hidden">
       <div className="aspect-video bg-black relative">
-        {room.platform === "youtube" || room.platform === "twitch" ? (
+        {room.platform === "youtube" ? (
+          <div id={`youtube-player-${room.id}`} className="w-full h-full" />
+        ) : room.platform === "twitch" ? (
           <iframe
             src={getEmbedUrl()}
             className="w-full h-full"
