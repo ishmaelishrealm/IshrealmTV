@@ -59,6 +59,17 @@ export interface VideoState {
   last_updated: string
 }
 
+export interface ActionRequest {
+  id: string
+  room_id: string
+  user_name: string
+  user_id: string
+  action_type: 'play' | 'pause' | 'seek' | 'change_video'
+  action_data?: any
+  status: 'pending' | 'approved' | 'denied'
+  created_at: string
+}
+
 // Database functions
 export const roomService = {
   async createRoom(room: Omit<Room, 'id' | 'created_at' | 'updated_at' | 'participant_count'>) {
@@ -223,6 +234,58 @@ export const videoStateService = {
         filter: `room_id=eq.${roomId}`
       }, (payload) => {
         callback(payload.new as VideoState)
+      })
+      .subscribe()
+  }
+}
+
+export const actionRequestService = {
+  async createRequest(request: Omit<ActionRequest, 'id' | 'created_at' | 'status'>) {
+    const { data, error } = await supabase
+      .from('action_requests')
+      .insert([{ ...request, status: 'pending' }])
+      .select()
+      .single()
+    
+    if (error) throw error
+    return data
+  },
+
+  async getRequests(roomId: string, status?: 'pending' | 'approved' | 'denied') {
+    let query = supabase
+      .from('action_requests')
+      .select('*')
+      .eq('room_id', roomId)
+      .order('created_at', { ascending: false })
+    
+    if (status) {
+      query = query.eq('status', status)
+    }
+    
+    const { data, error } = await query
+    if (error) throw error
+    return data
+  },
+
+  async updateRequestStatus(requestId: string, status: 'approved' | 'denied') {
+    const { error } = await supabase
+      .from('action_requests')
+      .update({ status })
+      .eq('id', requestId)
+    
+    if (error) throw error
+  },
+
+  async subscribeToRequests(roomId: string, callback: (request: ActionRequest) => void) {
+    return supabase
+      .channel(`action_requests:${roomId}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'action_requests',
+        filter: `room_id=eq.${roomId}`
+      }, (payload) => {
+        callback(payload.new as ActionRequest)
       })
       .subscribe()
   }
