@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, hasSupabaseConfig } from '../lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface GuestSession {
@@ -76,8 +76,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Check active Supabase session
+  // Check active Supabase session (only if configured)
   useEffect(() => {
+    if (!hasSupabaseConfig) {
+      // If Supabase isn't configured, skip auth check
+      setLoading(false);
+      return;
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -100,6 +106,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, userName: string) => {
+    if (!hasSupabaseConfig) {
+      throw new Error('Supabase is not configured. Please add environment variables.');
+    }
+    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -129,6 +139,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
+    if (!hasSupabaseConfig) {
+      throw new Error('Supabase is not configured. Please add environment variables.');
+    }
+    
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -138,6 +152,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    if (!hasSupabaseConfig) {
+      return;
+    }
+    
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     

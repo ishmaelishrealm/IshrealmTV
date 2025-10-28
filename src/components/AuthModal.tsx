@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { X, Mail, Lock, User as UserIcon, Clock, Sparkles } from 'lucide-react';
+import { X, Mail, Lock, User as UserIcon, Clock, Sparkles, AlertTriangle } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card } from './ui/card';
 import { useAuth } from '../contexts/AuthContext';
+import { hasSupabaseConfig } from '../lib/supabase';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -113,7 +114,31 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           </div>
         )}
 
-        {(mode === 'login' || mode === 'signup') && (
+        {(mode === 'login' || mode === 'signup') && !hasSupabaseConfig && (
+          <div className="space-y-4">
+            <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-yellow-400 font-medium text-sm">Supabase Not Configured</p>
+                  <p className="text-yellow-400/70 text-xs mt-1">
+                    Authentication requires Supabase environment variables. Please use Guest Mode or contact the administrator.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              onClick={() => setMode('guest')}
+              className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white py-6 h-auto"
+            >
+              ← Back to Guest Mode
+            </Button>
+          </div>
+        )}
+
+        {(mode === 'login' || mode === 'signup') && hasSupabaseConfig && (
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === 'signup' && (
               <div className="space-y-2">
