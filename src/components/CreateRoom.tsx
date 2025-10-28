@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Youtube, Twitch, Upload, ArrowLeft, Copy, Check, FileVideo, AlertTriangle } from "lucide-react";
+import { Youtube, Twitch, Upload, ArrowLeft, Copy, Check, FileVideo, AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Input } from "./ui/input";
@@ -7,6 +7,7 @@ import { Label } from "./ui/label";
 import { Room } from "../App";
 import { useAuth } from "../contexts/AuthContext";
 import { createRoom as storeRoom } from "../lib/roomStorage";
+import { videoUploadService, hasSupabaseConfig } from "../lib/supabase";
 
 interface CreateRoomProps {
   onCreateRoom: (room: Room) => void;
@@ -23,6 +24,9 @@ export function CreateRoom({ onCreateRoom, onBack }: CreateRoomProps) {
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [localFile, setLocalFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Check if guest session is valid
   const isGuestSessionValid = !isGuest || (guestSession && guestSession.timeRemaining > 0);
@@ -31,14 +35,35 @@ export function CreateRoom({ onCreateRoom, onBack }: CreateRoomProps) {
     return `ISH-${Math.floor(100000 + Math.random() * 900000)}`;
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.type.startsWith("video/")) {
-      setLocalFile(file);
-      // Create a temporary URL for the local file
-      const fileUrl = URL.createObjectURL(file);
-      setUrl(fileUrl);
+    if (!file || !file.type.startsWith("video/")) {
+      alert('Please select a valid video file (MP4, WebM, or MKV)');
+      return;
     }
+
+    setLocalFile(file);
+    setUploadError(null);
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    // Auto-upload to Supabase Storage
+    const { url: uploadedUrl, error } = await videoUploadService.uploadVideo(
+      file,
+      (progress) => setUploadProgress(progress)
+    );
+
+    setIsUploading(false);
+
+    if (error) {
+      setUploadError(error);
+      setLocalFile(null);
+      setUrl('');
+      return;
+    }
+
+    // Use the hosted URL instead of local blob
+    setUrl(uploadedUrl);
   };
 
   const handleCreate = () => {
@@ -50,9 +75,9 @@ export function CreateRoom({ onCreateRoom, onBack }: CreateRoomProps) {
       return;
     }
     
-    // Disable local files - can't sync across browsers
-    if (platform === 'local') {
-      alert('Local file uploads are temporarily disabled. Please use YouTube, Twitch, or hosted video URLs for synced watch parties!');
+    // Check if Supabase is configured for local file uploads
+    if (platform === 'local' && !hasSupabaseConfig) {
+      alert('Video uploads require Supabase configuration. Please add environment variables or use YouTube/Twitch URLs for now.');
       return;
     }
     
@@ -180,7 +205,7 @@ export function CreateRoom({ onCreateRoom, onBack }: CreateRoomProps) {
           {/* Platform Selection - Mobile Optimized */}
           <div className="space-y-3">
             <Label className="text-white/80">Select Platform</Label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <button
                 onClick={() => setPlatform("youtube")}
                 className={`p-3 md:p-4 rounded-lg border-2 transition-all touch-manipulation ${
@@ -216,13 +241,32 @@ export function CreateRoom({ onCreateRoom, onBack }: CreateRoomProps) {
                 <Upload className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 text-blue-400" />
                 <p className="text-xs md:text-sm text-white">Hosted Video</p>
               </button>
+
+              <button
+                onClick={() => setPlatform("local")}
+                className={`p-3 md:p-4 rounded-lg border-2 transition-all touch-manipulation ${
+                  platform === "local"
+                    ? "border-pink-500 bg-pink-500/20"
+                    : "border-white/20 bg-white/5 hover:border-white/40"
+                }`}
+              >
+                <FileVideo className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 text-pink-400" />
+                <p className="text-xs md:text-sm text-white">Upload File</p>
+              </button>
             </div>
-            <p className="text-xs text-white/50 text-center">
-              💡 Tip: Use YouTube or hosted video URLs for best sync performance
-            </p>
+            {hasSupabaseConfig ? (
+              <p className="text-xs text-green-400/70 text-center flex items-center justify-center gap-2">
+                <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
+                Video uploads enabled (Free during testing)
+              </p>
+            ) : (
+              <p className="text-xs text-yellow-400/70 text-center">
+                💡 Tip: Add Supabase config to enable video uploads
+              </p>
+            )}
           </div>
 
-          {/* URL Input or File Upload */}
+          {/* URL Input */}
           {platform && platform !== "local" && (
             <div className="space-y-2">
               <Label htmlFor="url" className="text-white/80">
@@ -244,6 +288,86 @@ export function CreateRoom({ onCreateRoom, onBack }: CreateRoomProps) {
                 onChange={(e) => setUrl(e.target.value)}
                 className="bg-black/30 border-white/20 text-white placeholder:text-white/40 h-12 md:h-auto"
               />
+            </div>
+          )}
+
+          {/* Local File Upload with Auto-Upload */}
+          {platform === "local" && (
+            <div className="space-y-3">
+              <Label htmlFor="file" className="text-white/80">
+                Upload Video File (Auto-hosted)
+              </Label>
+              <div className={`border-2 border-dashed rounded-lg p-6 md:p-8 text-center transition-all ${
+                isUploading ? 'border-pink-500/40 bg-pink-500/10' : 
+                uploadError ? 'border-red-500/40 bg-red-500/10' :
+                localFile ? 'border-green-500/40 bg-green-500/10' :
+                'border-white/20 hover:border-pink-400/40'
+              }`}>
+                <Input
+                  id="file"
+                  type="file"
+                  accept="video/mp4,video/webm,video/ogg,video/x-matroska"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  disabled={isUploading}
+                />
+                <label 
+                  htmlFor="file" 
+                  className={`cursor-pointer flex flex-col items-center gap-3 ${isUploading ? 'pointer-events-none' : ''}`}
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="w-10 h-10 md:w-12 md:h-12 text-pink-400 animate-spin" />
+                      <div className="space-y-2 w-full">
+                        <p className="text-white text-sm md:text-base">Uploading to CDN...</p>
+                        <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-pink-500 to-purple-500 transition-all duration-300"
+                            style={{ width: `${uploadProgress}%` }}
+                          />
+                        </div>
+                        <p className="text-white/60 text-xs">{uploadProgress}%</p>
+                      </div>
+                    </>
+                  ) : localFile ? (
+                    <>
+                      <Check className="w-10 h-10 md:w-12 md:h-12 text-green-400" />
+                      <div className="space-y-1">
+                        <p className="text-white text-sm md:text-base font-medium">{localFile.name}</p>
+                        <p className="text-white/60 text-xs">
+                          {(localFile.size / (1024 * 1024)).toFixed(2)} MB
+                        </p>
+                        <p className="text-green-400 text-xs">✓ Uploaded & ready to share!</p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <FileVideo className="w-10 h-10 md:w-12 md:h-12 text-pink-400" />
+                      <p className="text-white text-sm md:text-base">Click to upload video file</p>
+                      <p className="text-white/60 text-xs">MP4, WebM, MKV (Max 500MB)</p>
+                    </>
+                  )}
+                </label>
+              </div>
+              
+              {uploadError && (
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-red-400 text-xs">{uploadError}</p>
+                  </div>
+                </div>
+              )}
+              
+              <div className="p-3 rounded-lg bg-pink-500/10 border border-pink-500/30">
+                <p className="text-pink-300 text-xs leading-relaxed">
+                  <strong className="block mb-1">How it works:</strong>
+                  1. Select your video file<br />
+                  2. Auto-uploads to secure CDN<br />
+                  3. Everyone gets the same hosted URL<br />
+                  4. Perfect sync across all devices!
+                </p>
+              </div>
             </div>
           )}
 

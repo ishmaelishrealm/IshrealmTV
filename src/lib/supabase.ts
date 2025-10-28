@@ -290,3 +290,99 @@ export const actionRequestService = {
       .subscribe()
   }
 }
+
+// Video Upload Service for Supabase Storage
+export const videoUploadService = {
+  /**
+   * Upload a video file to Supabase Storage
+   * Returns the public URL of the uploaded video
+   */
+  async uploadVideo(
+    file: File,
+    onProgress?: (progress: number) => void
+  ): Promise<{ url: string; error: string | null }> {
+    if (!hasSupabaseConfig) {
+      return {
+        url: '',
+        error: 'Supabase is not configured. Please add environment variables to enable video uploads.',
+      }
+    }
+
+    try {
+      // Generate unique filename
+      const timestamp = Date.now()
+      const randomId = Math.random().toString(36).substring(2, 9)
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${timestamp}-${randomId}.${fileExt}`
+      const filePath = `videos/${fileName}`
+
+      // Simulate progress (Supabase doesn't provide upload progress yet)
+      if (onProgress) onProgress(50)
+
+      // Upload file to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('ishrealm-videos')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+        })
+
+      if (error) {
+        console.error('Upload error:', error)
+        return {
+          url: '',
+          error: `Upload failed: ${error.message}`,
+        }
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('ishrealm-videos')
+        .getPublicUrl(filePath)
+
+      if (onProgress) onProgress(100)
+
+      return {
+        url: publicUrl,
+        error: null,
+      }
+    } catch (error: any) {
+      console.error('Upload error:', error)
+      return {
+        url: '',
+        error: error.message || 'Unknown error occurred during upload',
+      }
+    }
+  },
+
+  /**
+   * Delete a video from Supabase Storage
+   */
+  async deleteVideo(url: string): Promise<{ success: boolean; error: string | null }> {
+    if (!hasSupabaseConfig) {
+      return { success: false, error: 'Supabase not configured' }
+    }
+
+    try {
+      // Extract file path from URL
+      const urlParts = url.split('/storage/v1/object/public/ishrealm-videos/')
+      if (urlParts.length < 2) {
+        return { success: false, error: 'Invalid URL format' }
+      }
+      
+      const filePath = urlParts[1]
+
+      const { error } = await supabase.storage
+        .from('ishrealm-videos')
+        .remove([filePath])
+
+      if (error) {
+        return { success: false, error: error.message }
+      }
+
+      return { success: true, error: null }
+    } catch (error: any) {
+      return { success: false, error: error.message }
+    }
+  },
+}
