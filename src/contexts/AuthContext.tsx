@@ -7,6 +7,7 @@ interface GuestSession {
   startTime: number;
   expiresAt: number;
   timeRemaining: number;
+  hash?: string; // Add hash for validation
 }
 
 interface AuthContextType {
@@ -26,6 +27,16 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const GUEST_SESSION_KEY = 'ishrealm_guest_session';
 const GUEST_SESSION_MINUTES = parseInt(import.meta.env.VITE_GUEST_SESSION_MINUTES || '90');
+const SESSION_SECRET = 'ISH_REALM_TV_2024_SECRET'; // Simple validation key
+
+// Create a simple hash to prevent tampering
+const createSessionHash = (id: string, expiresAt: number): string => {
+  return btoa(`${id}-${expiresAt}-${SESSION_SECRET}`);
+};
+
+const validateSessionHash = (id: string, expiresAt: number, hash: string): boolean => {
+  return hash === createSessionHash(id, expiresAt);
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -52,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => clearInterval(interval);
   }, [isGuest, guestSession]);
 
-  // Load guest session from localStorage
+  // Load guest session from localStorage with tampering detection
   useEffect(() => {
     const savedSession = localStorage.getItem(GUEST_SESSION_KEY);
     if (savedSession) {
@@ -60,6 +71,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const parsed = JSON.parse(savedSession);
         const now = Date.now();
         
+        // STRICT: Validate hash to prevent tampering
+        if (parsed.hash && !validateSessionHash(parsed.id, parsed.expiresAt, parsed.hash)) {
+          console.warn('Guest session tampering detected - clearing session');
+          localStorage.removeItem(GUEST_SESSION_KEY);
+          return;
+        }
+        
+        // STRICT: Validate expiration
         if (parsed.expiresAt > now) {
           setIsGuest(true);
           setGuestSession({
@@ -167,12 +186,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const now = Date.now();
     const expiresAt = now + (GUEST_SESSION_MINUTES * 60 * 1000);
     const guestId = `guest_${Math.random().toString(36).substring(2, 11)}`;
+    const hash = createSessionHash(guestId, expiresAt);
     
     const newGuestSession: GuestSession = {
       id: guestId,
       startTime: now,
       expiresAt,
-      timeRemaining: expiresAt - now
+      timeRemaining: expiresAt - now,
+      hash
     };
 
     setIsGuest(true);

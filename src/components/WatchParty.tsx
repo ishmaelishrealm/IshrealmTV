@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Copy, Users, Crown, Check, UserX } from "lucide-react";
+import { Copy, Users, Crown, Check, UserX, AlertTriangle } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Room } from "../App";
 import { VideoPlayer } from "./VideoPlayer";
 import { ChatBox } from "./ChatBox";
 import { RoomControls } from "./RoomControls";
+import { useAuth } from "../contexts/AuthContext";
 
 interface WatchPartyProps {
   room: Room;
@@ -19,7 +20,8 @@ export interface VideoState {
   playbackSpeed: number;
 }
 
-export function WatchParty({ room }: WatchPartyProps) {
+export function WatchParty({ room, onLeaveRoom }: WatchPartyProps) {
+  const { isGuest, guestSession } = useAuth();
   const [videoState, setVideoState] = useState<VideoState>({
     playing: false,
     currentTime: 0,
@@ -29,15 +31,29 @@ export function WatchParty({ room }: WatchPartyProps) {
   const [copied, setCopied] = useState(false);
   const [participants, setParticipants] = useState([
     { id: "1", name: room.hostName, isHost: true },
-    { id: "2", name: "Alex", isHost: false },
-    { id: "3", name: "Jordan", isHost: false },
-    { id: "4", name: "Sam", isHost: false },
   ]);
+  const [showGuestWarning, setShowGuestWarning] = useState(false);
 
   const handleKickParticipant = (participantId: string) => {
     setParticipants(prev => prev.filter(p => p.id !== participantId));
     // TODO: In real implementation, send kick event via Supabase
   };
+
+  // Guest session expiry check - STRICT ENFORCEMENT
+  useEffect(() => {
+    if (!isGuest || !guestSession) return;
+
+    // Show warning when 5 minutes remaining
+    if (guestSession.timeRemaining <= 5 * 60 * 1000 && guestSession.timeRemaining > 0) {
+      setShowGuestWarning(true);
+    }
+
+    // Force kick when session expires
+    if (guestSession.timeRemaining === 0) {
+      alert('Your 90-minute guest session has expired. Please sign up for unlimited access!');
+      onLeaveRoom();
+    }
+  }, [isGuest, guestSession, onLeaveRoom]);
 
   const copyRoomCode = () => {
     navigator.clipboard.writeText(room.id);
@@ -53,6 +69,22 @@ export function WatchParty({ room }: WatchPartyProps) {
   return (
     <div className="relative z-10 min-h-[calc(100vh-73px)] p-3 md:p-4">
       <div className="max-w-7xl mx-auto">
+        {/* Guest Session Warning - 5 Minutes Remaining */}
+        {showGuestWarning && isGuest && guestSession && (
+          <Card className="mb-3 md:mb-4 bg-yellow-500/10 border-yellow-500/50 backdrop-blur-sm p-3 md:p-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="text-yellow-400 font-semibold text-sm md:text-base">Guest Session Expiring Soon!</h3>
+                <p className="text-yellow-400/80 text-xs md:text-sm mt-1">
+                  You have {Math.ceil(guestSession.timeRemaining / 60000)} minutes left. 
+                  Sign up now for unlimited access and to save your progress!
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
+
         {/* Room Header - Mobile Optimized */}
         <div className="mb-3 md:mb-4 flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2 md:gap-4 w-full sm:w-auto">

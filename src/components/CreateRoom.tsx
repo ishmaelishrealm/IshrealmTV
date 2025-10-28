@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Youtube, Twitch, Upload, ArrowLeft, Copy, Check, FileVideo } from "lucide-react";
+import { Youtube, Twitch, Upload, ArrowLeft, Copy, Check, FileVideo, AlertTriangle } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Room } from "../App";
+import { useAuth } from "../contexts/AuthContext";
 
 interface CreateRoomProps {
   onCreateRoom: (room: Room) => void;
@@ -14,12 +15,16 @@ interface CreateRoomProps {
 type Platform = "youtube" | "twitch" | "hosted" | "local";
 
 export function CreateRoom({ onCreateRoom, onBack }: CreateRoomProps) {
+  const { isGuest, guestSession } = useAuth();
   const [platform, setPlatform] = useState<Platform | null>(null);
   const [url, setUrl] = useState("");
   const [hostName, setHostName] = useState("");
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [localFile, setLocalFile] = useState<File | null>(null);
+
+  // Check if guest session is valid
+  const isGuestSessionValid = !isGuest || (guestSession && guestSession.timeRemaining > 0);
 
   const generateRoomCode = () => {
     return `ISH-${Math.floor(100000 + Math.random() * 900000)}`;
@@ -37,6 +42,12 @@ export function CreateRoom({ onCreateRoom, onBack }: CreateRoomProps) {
 
   const handleCreate = () => {
     if (!platform || !url || !hostName) return;
+    
+    // STRICT: Block if guest session expired
+    if (isGuest && (!guestSession || guestSession.timeRemaining === 0)) {
+      alert('Your guest session has expired! Please sign up for unlimited access.');
+      return;
+    }
     
     const code = generateRoomCode();
     setRoomCode(code);
@@ -122,6 +133,21 @@ export function CreateRoom({ onCreateRoom, onBack }: CreateRoomProps) {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
         </Button>
+
+        {/* Guest Session Expired Warning */}
+        {!isGuestSessionValid && (
+          <Card className="mb-6 bg-red-500/10 border-red-500/50 backdrop-blur-sm p-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="text-red-400 font-semibold text-sm md:text-base">Guest Session Expired</h3>
+                <p className="text-red-400/80 text-xs md:text-sm mt-1">
+                  Your 90-minute guest session has ended. Please sign up for unlimited access to create rooms!
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
 
         <Card className="bg-black/40 border-pink-500/20 backdrop-blur-md p-6 md:p-8 space-y-6">
           <div className="space-y-2">
@@ -267,10 +293,10 @@ export function CreateRoom({ onCreateRoom, onBack }: CreateRoomProps) {
 
           <Button
             onClick={handleCreate}
-            disabled={!platform || !url || !hostName}
+            disabled={!platform || !url || !hostName || !isGuestSessionValid}
             className="w-full bg-gradient-to-r from-pink-600 to-green-600 hover:from-pink-500 hover:to-green-500 text-white py-5 md:py-6 h-auto disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
           >
-            Create Room
+            {!isGuestSessionValid ? 'Guest Session Expired - Sign Up Required' : 'Create Room'}
           </Button>
         </Card>
       </div>
