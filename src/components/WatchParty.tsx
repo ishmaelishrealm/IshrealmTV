@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Copy, Users, Crown, Check } from "lucide-react";
+import { Copy, Users, Crown, Check, UserX } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Room } from "../App";
@@ -16,6 +16,7 @@ export interface VideoState {
   playing: boolean;
   currentTime: number;
   duration: number;
+  playbackSpeed: number;
 }
 
 export function WatchParty({ room }: WatchPartyProps) {
@@ -23,13 +24,20 @@ export function WatchParty({ room }: WatchPartyProps) {
     playing: false,
     currentTime: 0,
     duration: 0,
+    playbackSpeed: 1,
   });
   const [copied, setCopied] = useState(false);
-  const [participants] = useState([
+  const [participants, setParticipants] = useState([
     { id: "1", name: room.hostName, isHost: true },
     { id: "2", name: "Alex", isHost: false },
     { id: "3", name: "Jordan", isHost: false },
+    { id: "4", name: "Sam", isHost: false },
   ]);
+
+  const handleKickParticipant = (participantId: string) => {
+    setParticipants(prev => prev.filter(p => p.id !== participantId));
+    // TODO: In real implementation, send kick event via Supabase
+  };
 
   const copyRoomCode = () => {
     navigator.clipboard.writeText(room.id);
@@ -95,24 +103,34 @@ export function WatchParty({ room }: WatchPartyProps) {
             <Card className="hidden lg:block bg-black/40 border-pink-500/20 backdrop-blur-sm p-4">
               <h3 className="text-white mb-3 flex items-center gap-2">
                 <Users className="w-4 h-4" />
-                Participants
+                Participants ({participants.length})
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-2 max-h-[400px] overflow-y-auto">
                 {participants.map((participant) => (
                   <div
                     key={participant.id}
-                    className="flex items-center gap-3 p-2 rounded-lg bg-white/5"
+                    className="flex items-center gap-3 p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
                   >
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-green-400 flex items-center justify-center text-white text-sm">
                       {participant.name[0]}
                     </div>
                     <span className="text-white flex-1">{participant.name}</span>
-                    {participant.isHost && (
+                    {participant.isHost ? (
                       <div className="flex items-center gap-1 px-2 py-1 bg-yellow-500/20 rounded text-xs text-yellow-300">
                         <Crown className="w-3 h-3" />
                         Host
                       </div>
-                    )}
+                    ) : room.isHost ? (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleKickParticipant(participant.id)}
+                        className="h-7 w-7 p-0 hover:bg-red-500/20 hover:text-red-300"
+                        title={`Kick ${participant.name}`}
+                      >
+                        <UserX className="w-4 h-4" />
+                      </Button>
+                    ) : null}
                   </div>
                 ))}
               </div>
@@ -128,24 +146,34 @@ export function WatchParty({ room }: WatchPartyProps) {
           <Card className="lg:hidden bg-black/40 border-pink-500/20 backdrop-blur-sm p-4">
             <h3 className="text-white mb-3 flex items-center gap-2">
               <Users className="w-4 h-4" />
-              Participants
+              Participants ({participants.length})
             </h3>
             <div className="space-y-2">
               {participants.map((participant) => (
                 <div
                   key={participant.id}
-                  className="flex items-center gap-3 p-2 rounded-lg bg-white/5"
+                  className="flex items-center gap-3 p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
                 >
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-green-400 flex items-center justify-center text-white text-sm">
                     {participant.name[0]}
                   </div>
-                  <span className="text-white flex-1">{participant.name}</span>
-                  {participant.isHost && (
+                  <span className="text-white flex-1 text-sm">{participant.name}</span>
+                  {participant.isHost ? (
                     <div className="flex items-center gap-1 px-2 py-1 bg-yellow-500/20 rounded text-xs text-yellow-300">
                       <Crown className="w-3 h-3" />
                       Host
                     </div>
-                  )}
+                  ) : room.isHost ? (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleKickParticipant(participant.id)}
+                      className="h-7 w-7 p-0 hover:bg-red-500/20 hover:text-red-300"
+                      title={`Kick ${participant.name}`}
+                    >
+                      <UserX className="w-4 h-4" />
+                    </Button>
+                  ) : null}
                 </div>
               ))}
             </div>

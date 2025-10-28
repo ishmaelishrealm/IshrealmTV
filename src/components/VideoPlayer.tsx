@@ -24,6 +24,12 @@ export function VideoPlayer({ room, videoState, onStateChange, isHost }: VideoPl
     }
   }, [videoState.playing]);
 
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = videoState.playbackSpeed;
+    }
+  }, [videoState.playbackSpeed]);
+
   const getEmbedUrl = () => {
     if (room.platform === "youtube") {
       const videoId = room.url.split("v=")[1]?.split("&")[0];

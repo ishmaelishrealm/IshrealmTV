@@ -1,4 +1,4 @@
-import { Play, Pause, SkipForward, Volume2, VolumeX, RotateCcw } from "lucide-react";
+import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, RotateCcw, Gauge } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Slider } from "./ui/slider";
@@ -13,6 +13,9 @@ interface RoomControlsProps {
 export function RoomControls({ videoState, onStateChange }: RoomControlsProps) {
   const [volume, setVolume] = useState(100);
   const [muted, setMuted] = useState(false);
+  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
+  
+  const playbackSpeeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
   const togglePlayPause = () => {
     onStateChange({
@@ -35,6 +38,30 @@ export function RoomControls({ videoState, onStateChange }: RoomControlsProps) {
       ...videoState,
       currentTime: newTime,
     });
+  };
+
+  const skipBackward = () => {
+    const newTime = Math.max(videoState.currentTime - 10, 0);
+    onStateChange({
+      ...videoState,
+      currentTime: newTime,
+    });
+  };
+
+  const restartVideo = () => {
+    onStateChange({
+      ...videoState,
+      currentTime: 0,
+      playing: false,
+    });
+  };
+
+  const changePlaybackSpeed = (speed: number) => {
+    onStateChange({
+      ...videoState,
+      playbackSpeed: speed,
+    });
+    setShowSpeedMenu(false);
   };
 
   const toggleMute = () => {
@@ -69,7 +96,30 @@ export function RoomControls({ videoState, onStateChange }: RoomControlsProps) {
 
         {/* Controls */}
         <div className="flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-1 md:gap-2">
+          <div className="flex items-center gap-1 md:gap-2 flex-wrap">
+            {/* Restart Button */}
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={restartVideo}
+              className="hover:bg-white/10 h-9 w-9 md:h-10 md:w-10 p-0"
+              title="Restart video"
+            >
+              <RotateCcw className="w-4 h-4 md:w-5 md:h-5" />
+            </Button>
+
+            {/* Rewind 10s */}
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={skipBackward}
+              className="hover:bg-white/10 h-9 w-9 md:h-10 md:w-10 p-0"
+              title="Rewind 10 seconds"
+            >
+              <SkipBack className="w-4 h-4 md:w-5 md:h-5" />
+            </Button>
+
+            {/* Play/Pause */}
             <Button
               size="sm"
               variant="ghost"
@@ -83,6 +133,7 @@ export function RoomControls({ videoState, onStateChange }: RoomControlsProps) {
               )}
             </Button>
 
+            {/* Skip Forward 30s */}
             <Button
               size="sm"
               variant="ghost"
@@ -92,6 +143,40 @@ export function RoomControls({ videoState, onStateChange }: RoomControlsProps) {
             >
               <SkipForward className="w-4 h-4 md:w-5 md:h-5" />
             </Button>
+
+            {/* Playback Speed */}
+            <div className="relative">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setShowSpeedMenu(!showSpeedMenu)}
+                className="hover:bg-white/10 h-9 px-2 md:h-10 md:px-3"
+                title="Playback speed"
+              >
+                <Gauge className="w-4 h-4 md:w-5 md:h-5 mr-1" />
+                <span className="text-xs">{videoState.playbackSpeed}x</span>
+              </Button>
+              
+              {showSpeedMenu && (
+                <div className="absolute bottom-full left-0 mb-2 bg-black/95 border border-white/20 rounded-lg p-2 backdrop-blur-xl z-50">
+                  <div className="flex flex-col gap-1 min-w-[80px]">
+                    {playbackSpeeds.map((speed) => (
+                      <Button
+                        key={speed}
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => changePlaybackSpeed(speed)}
+                        className={`hover:bg-white/10 text-xs justify-start ${
+                          videoState.playbackSpeed === speed ? 'bg-pink-500/20 text-pink-300' : 'text-white'
+                        }`}
+                      >
+                        {speed}x
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Volume - Hidden on small mobile, shown on larger screens */}
             <div className="hidden sm:flex items-center gap-2 ml-2">
