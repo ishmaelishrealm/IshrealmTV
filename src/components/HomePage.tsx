@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Users, Sparkles, Heart, Film, Popcorn } from "lucide-react";
+import { Plus, Users, Sparkles } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { View } from "../App";
@@ -30,18 +30,11 @@ export function HomePage({ setCurrentView }: HomePageProps) {
       <div className="max-w-6xl mx-auto text-center space-y-8 md:space-y-12">
         {/* Cinematic Hero Section */}
         <div className="space-y-6 md:space-y-8">
-          {/* Decorative Icons */}
-          <div className="flex items-center justify-center gap-4 opacity-60">
-            <Film className="w-8 h-8 md:w-10 md:h-10 text-pink-400 animate-pulse" />
-            <Popcorn className="w-8 h-8 md:w-10 md:h-10 text-yellow-400 animate-bounce" style={{ animationDuration: '3s' }} />
-            <Heart className="w-8 h-8 md:w-10 md:h-10 text-red-400 animate-pulse" style={{ animationDelay: '1s' }} />
-          </div>
-          
           {/* Main Heading with Rotating Text */}
           <div className="space-y-4">
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight px-4">
               <span className="bg-gradient-to-r from-white via-pink-200 to-purple-200 bg-clip-text text-transparent">
-                Movie
+                Movie Night
               </span>
             </h1>
             

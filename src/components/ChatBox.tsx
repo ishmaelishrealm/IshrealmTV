@@ -175,32 +175,32 @@ export function ChatBox({ roomId }: ChatBoxProps) {
           <Button
             size="sm"
             variant="ghost"
-            onClick={() => sendReaction(<Heart className="w-5 h-5 md:w-6 md:h-6 text-red-400" />)}
-            className="hover:bg-white/10 h-9 w-9 md:h-10 md:w-10 p-0 text-base md:text-lg"
+            onClick={() => sendReaction(<span className="text-2xl">❤️</span>)}
+            className="hover:bg-white/10 hover:scale-110 transition-transform h-9 w-9 md:h-10 md:w-10 p-0 text-base md:text-lg"
           >
             ❤️
           </Button>
           <Button
             size="sm"
             variant="ghost"
-            onClick={() => sendReaction(<Laugh className="w-5 h-5 md:w-6 md:h-6 text-yellow-400" />)}
-            className="hover:bg-white/10 h-9 w-9 md:h-10 md:w-10 p-0 text-base md:text-lg"
+            onClick={() => sendReaction(<span className="text-2xl">😂</span>)}
+            className="hover:bg-white/10 hover:scale-110 transition-transform h-9 w-9 md:h-10 md:w-10 p-0 text-base md:text-lg"
           >
             😂
           </Button>
           <Button
             size="sm"
             variant="ghost"
-            onClick={() => sendReaction(<ThumbsUp className="w-5 h-5 md:w-6 md:h-6 text-blue-400" />)}
-            className="hover:bg-white/10 h-9 w-9 md:h-10 md:w-10 p-0 text-base md:text-lg"
+            onClick={() => sendReaction(<span className="text-2xl">👍</span>)}
+            className="hover:bg-white/10 hover:scale-110 transition-transform h-9 w-9 md:h-10 md:w-10 p-0 text-base md:text-lg"
           >
             👍
           </Button>
           <Button
             size="sm"
             variant="ghost"
-            onClick={() => sendReaction(<Sparkles className="w-5 h-5 md:w-6 md:h-6 text-purple-400" />)}
-            className="hover:bg-white/10 h-9 w-9 md:h-10 md:w-10 p-0 text-base md:text-lg"
+            onClick={() => sendReaction(<span className="text-2xl">✨</span>)}
+            className="hover:bg-white/10 hover:scale-110 transition-transform h-9 w-9 md:h-10 md:w-10 p-0 text-base md:text-lg"
           >
             ✨
           </Button>

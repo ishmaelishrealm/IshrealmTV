@@ -1,4 +1,4 @@
-import { Play, Pause, SkipForward, Volume2, VolumeX } from "lucide-react";
+import { Play, Pause, SkipForward, Volume2, VolumeX, RotateCcw } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Slider } from "./ui/slider";
@@ -22,9 +22,18 @@ export function RoomControls({ videoState, onStateChange }: RoomControlsProps) {
   };
 
   const handleSeek = (value: number[]) => {
+    // Only commit the seek when user releases the slider
     onStateChange({
       ...videoState,
       currentTime: value[0],
+    });
+  };
+
+  const skipForward = () => {
+    const newTime = Math.min(videoState.currentTime + 30, videoState.duration);
+    onStateChange({
+      ...videoState,
+      currentTime: newTime,
     });
   };
 
@@ -50,7 +59,7 @@ export function RoomControls({ videoState, onStateChange }: RoomControlsProps) {
             value={[videoState.currentTime]}
             max={videoState.duration}
             step={1}
-            onValueChange={handleSeek}
+            onValueCommit={handleSeek}
             className="flex-1"
           />
           <span className="text-white/60 text-xs md:text-sm min-w-[35px] md:min-w-[40px]">
@@ -77,7 +86,9 @@ export function RoomControls({ videoState, onStateChange }: RoomControlsProps) {
             <Button
               size="sm"
               variant="ghost"
+              onClick={skipForward}
               className="hover:bg-white/10 h-9 w-9 md:h-10 md:w-10 p-0"
+              title="Skip 30 seconds"
             >
               <SkipForward className="w-4 h-4 md:w-5 md:h-5" />
             </Button>
@@ -103,6 +114,7 @@ export function RoomControls({ videoState, onStateChange }: RoomControlsProps) {
                 onValueChange={(value: number[]) => setVolume(value[0])}
                 className="w-20 md:w-24"
               />
+              <span className="text-white/60 text-xs min-w-[35px]">{muted ? 0 : volume}%</span>
             </div>
           </div>
 

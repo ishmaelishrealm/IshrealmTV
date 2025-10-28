@@ -89,13 +89,9 @@ export function VideoPlayer({ room, videoState, onStateChange, isHost }: VideoPl
             <Volume2 className="w-3 h-3" />
             <span className="hidden sm:inline">You're controlling playback</span>
             <span className="sm:hidden">Host</span>
-          </div>
-        )}
-
-        {/* Local File Warning */}
-        {room.platform === "local" && isHost && (
-          <div className="absolute bottom-2 md:bottom-4 left-2 md:left-4 right-2 md:right-4 px-3 py-2 bg-yellow-500/80 backdrop-blur-sm rounded text-xs text-white">
-            ⚠️ Local file: Video will be removed when you leave
+            {room.platform === "local" && (
+              <span className="ml-1 text-yellow-200">⚠️</span>
+            )}
           </div>
         )}
 
@@ -131,6 +127,11 @@ export function VideoPlayer({ room, videoState, onStateChange, isHost }: VideoPl
                 ? `${((room.localFile?.size || 0) / (1024 * 1024)).toFixed(2)} MB` 
                 : room.url}
             </p>
+            {room.platform === "local" && isHost && (
+              <p className="text-yellow-400 text-xs mt-1">
+                ⚠️ Local file will be removed when you leave
+              </p>
+            )}
           </div>
           <div className="px-2 md:px-3 py-1 bg-pink-500/20 rounded-full text-xs text-pink-300 shrink-0">
             {room.platform}

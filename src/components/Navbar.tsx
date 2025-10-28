@@ -74,7 +74,7 @@ export function Navbar({ currentView, setCurrentView, inRoom, onLeaveRoom }: Nav
                   <User className="w-5 h-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-black/95 border-white/20 text-white backdrop-blur-xl">
+              <DropdownMenuContent align="end" className="bg-black/95 border-white/20 text-white backdrop-blur-md z-50">
                 <DropdownMenuItem 
                   onClick={() => setCurrentView("downloader")}
                   className="cursor-pointer hover:bg-pink-500/20 focus:bg-pink-500/20"
