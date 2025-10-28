@@ -98,7 +98,7 @@ export function WatchParty({ room, onLeaveRoom }: WatchPartyProps) {
         return;
       }
 
-      // Update participants
+      // Update participants (both host and guests)
       const participantList = updatedRoom.participants.map(p => ({
         id: p.id,
         name: p.name,
@@ -106,13 +106,25 @@ export function WatchParty({ room, onLeaveRoom }: WatchPartyProps) {
       }));
       setParticipants(participantList);
 
-      // Sync video state (guests only - host controls it)
+      // Sync video state (GUESTS ONLY - host controls it)
       if (!room.isHost && updatedRoom.videoState) {
-        setVideoState({
-          playing: updatedRoom.videoState.playing,
-          currentTime: updatedRoom.videoState.currentTime,
-          duration: updatedRoom.videoState.duration,
-          playbackSpeed: updatedRoom.videoState.playbackSpeed,
+        setVideoState(prev => {
+          // Only update if values actually changed to prevent unnecessary rerenders
+          const hasChanges = 
+            prev.playing !== updatedRoom.videoState.playing ||
+            prev.playbackSpeed !== updatedRoom.videoState.playbackSpeed ||
+            prev.duration !== updatedRoom.videoState.duration ||
+            Math.abs(prev.currentTime - updatedRoom.videoState.currentTime) > 1;
+          
+          if (hasChanges) {
+            return {
+              playing: updatedRoom.videoState.playing,
+              currentTime: updatedRoom.videoState.currentTime,
+              duration: updatedRoom.videoState.duration,
+              playbackSpeed: updatedRoom.videoState.playbackSpeed,
+            };
+          }
+          return prev;
         });
       }
     });
@@ -128,7 +140,7 @@ export function WatchParty({ room, onLeaveRoom }: WatchPartyProps) {
     return () => {
       unsubscribe();
     };
-  }, [room.id, room.isHost]);
+  }, [room.id, room.isHost, handleLeave]);
 
   return (
     <div className="relative z-10 min-h-[calc(100vh-73px)] p-3 md:p-4">

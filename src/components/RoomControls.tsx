@@ -24,8 +24,18 @@ export function RoomControls({ videoState, onStateChange }: RoomControlsProps) {
     });
   };
 
-  const handleSeek = (value: number[]) => {
-    // Only commit the seek when user releases the slider
+  const [isSeeking, setIsSeeking] = useState(false);
+  const [seekPreview, setSeekPreview] = useState(0);
+
+  const handleSeekChange = (value: number[]) => {
+    // Preview while dragging
+    setIsSeeking(true);
+    setSeekPreview(value[0]);
+  };
+
+  const handleSeekCommit = (value: number[]) => {
+    // Commit when user releases the slider
+    setIsSeeking(false);
     onStateChange({
       ...videoState,
       currentTime: value[0],
@@ -80,13 +90,14 @@ export function RoomControls({ videoState, onStateChange }: RoomControlsProps) {
         {/* Progress Bar */}
         <div className="flex items-center gap-2">
           <span className="text-white/60 text-xs md:text-sm min-w-[35px] md:min-w-[40px]">
-            {formatTime(videoState.currentTime)}
+            {formatTime(isSeeking ? seekPreview : videoState.currentTime)}
           </span>
           <Slider
-            value={[videoState.currentTime]}
+            value={[isSeeking ? seekPreview : videoState.currentTime]}
             max={videoState.duration}
-            step={1}
-            onValueCommit={handleSeek}
+            step={0.1}
+            onValueChange={handleSeekChange}
+            onValueCommit={handleSeekCommit}
             className="flex-1"
           />
           <span className="text-white/60 text-xs md:text-sm min-w-[35px] md:min-w-[40px]">

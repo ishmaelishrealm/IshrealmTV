@@ -34,7 +34,16 @@ export function JoinRoom({ onJoinRoom, onBack }: JoinRoomProps) {
     const storedRoom = getRoom(roomCode);
     
     if (!storedRoom) {
-      alert(`Room ${roomCode} not found. Please check the room code and try again.`);
+      alert(
+        `Room ${roomCode} not found!\n\n` +
+        `Possible reasons:\n` +
+        `• The host hasn't created the room yet\n` +
+        `• The room code is incorrect\n` +
+        `• The room expired (rooms last 4 hours)\n` +
+        `• You're on a different device than the host\n\n` +
+        `Note: For now, rooms only work on the SAME computer/browser.\n` +
+        `When Supabase is connected, rooms will work across all devices!`
+      );
       return;
     }
 

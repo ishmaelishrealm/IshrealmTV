@@ -17,7 +17,7 @@ export function VideoPlayer({ room, videoState, onStateChange, isHost }: VideoPl
   useEffect(() => {
     if (videoRef.current) {
       if (videoState.playing) {
-        videoRef.current.play();
+        videoRef.current.play().catch(e => console.log('Play error:', e));
       } else {
         videoRef.current.pause();
       }
@@ -29,6 +29,20 @@ export function VideoPlayer({ room, videoState, onStateChange, isHost }: VideoPl
       videoRef.current.playbackRate = videoState.playbackSpeed;
     }
   }, [videoState.playbackSpeed]);
+
+  // Sync video time with tolerance (for guests)
+  useEffect(() => {
+    if (!videoRef.current || isHost) return;
+    
+    const currentTime = videoRef.current.currentTime;
+    const targetTime = videoState.currentTime;
+    const timeDiff = Math.abs(currentTime - targetTime);
+    
+    // Only sync if difference is more than 2 seconds (prevents stuttering)
+    if (timeDiff > 2) {
+      videoRef.current.currentTime = targetTime;
+    }
+  }, [videoState.currentTime, isHost]);
 
   const getEmbedUrl = () => {
     if (room.platform === "youtube") {

@@ -188,7 +188,7 @@ export const subscribeToRoom = (
   const interval = setInterval(() => {
     const room = getRoom(roomId);
     callback(room);
-  }, 1000); // Poll every second
+  }, 500); // Poll every 500ms for faster sync
   
   return () => clearInterval(interval);
 };

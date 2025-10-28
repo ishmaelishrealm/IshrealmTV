@@ -50,7 +50,25 @@ export function CreateRoom({ onCreateRoom, onBack }: CreateRoomProps) {
       return;
     }
     
+    // Disable local files - can't sync across browsers
+    if (platform === 'local') {
+      alert('Local file uploads are temporarily disabled. Please use YouTube, Twitch, or hosted video URLs for synced watch parties!');
+      return;
+    }
+    
     const code = generateRoomCode();
+    
+    // Store room immediately so guests can join
+    const room: Room = {
+      id: code,
+      platform,
+      url,
+      hostName,
+      isHost: true,
+      localFile: localFile || undefined,
+    };
+    
+    storeRoom(room);
     setRoomCode(code);
   };
 
@@ -66,9 +84,7 @@ export function CreateRoom({ onCreateRoom, onBack }: CreateRoomProps) {
       localFile: localFile || undefined,
     };
     
-    // Store room data for other participants to join
-    storeRoom(room);
-    
+    // Room already stored in handleCreate, just join it
     onCreateRoom(room);
   };
 
@@ -164,7 +180,7 @@ export function CreateRoom({ onCreateRoom, onBack }: CreateRoomProps) {
           {/* Platform Selection - Mobile Optimized */}
           <div className="space-y-3">
             <Label className="text-white/80">Select Platform</Label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <button
                 onClick={() => setPlatform("youtube")}
                 className={`p-3 md:p-4 rounded-lg border-2 transition-all touch-manipulation ${
@@ -198,21 +214,12 @@ export function CreateRoom({ onCreateRoom, onBack }: CreateRoomProps) {
                 }`}
               >
                 <Upload className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 text-blue-400" />
-                <p className="text-xs md:text-sm text-white">Hosted</p>
-              </button>
-
-              <button
-                onClick={() => setPlatform("local")}
-                className={`p-3 md:p-4 rounded-lg border-2 transition-all touch-manipulation ${
-                  platform === "local"
-                    ? "border-pink-500 bg-pink-500/20"
-                    : "border-white/20 bg-white/5 hover:border-white/40"
-                }`}
-              >
-                <FileVideo className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 text-pink-400" />
-                <p className="text-xs md:text-sm text-white">Local File</p>
+                <p className="text-xs md:text-sm text-white">Hosted Video</p>
               </button>
             </div>
+            <p className="text-xs text-white/50 text-center">
+              💡 Tip: Use YouTube or hosted video URLs for best sync performance
+            </p>
           </div>
 
           {/* URL Input or File Upload */}
@@ -240,45 +247,6 @@ export function CreateRoom({ onCreateRoom, onBack }: CreateRoomProps) {
             </div>
           )}
 
-          {/* Local File Upload */}
-          {platform === "local" && (
-            <div className="space-y-3">
-              <Label htmlFor="file" className="text-white/80">
-                Upload MP4 Video File
-              </Label>
-              <div className="border-2 border-dashed border-white/20 rounded-lg p-6 md:p-8 text-center hover:border-pink-400/40 transition-all">
-                <Input
-                  id="file"
-                  type="file"
-                  accept="video/mp4,video/webm,video/ogg"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-                <label 
-                  htmlFor="file" 
-                  className="cursor-pointer flex flex-col items-center gap-3"
-                >
-                  <FileVideo className="w-10 h-10 md:w-12 md:h-12 text-pink-400" />
-                  {localFile ? (
-                    <div className="space-y-1">
-                      <p className="text-white text-sm md:text-base">{localFile.name}</p>
-                      <p className="text-white/60 text-xs">
-                        {(localFile.size / (1024 * 1024)).toFixed(2)} MB
-                      </p>
-                    </div>
-                  ) : (
-                    <>
-                      <p className="text-white text-sm md:text-base">Click to upload video file</p>
-                      <p className="text-white/60 text-xs">MP4, WebM, or OGG</p>
-                    </>
-                  )}
-                </label>
-              </div>
-              <p className="text-xs text-white/50">
-                ⚠️ File will only be available while you're hosting. When you leave, the video will be removed.
-              </p>
-            </div>
-          )}
 
           {/* Host Name */}
           {platform && url && (
