@@ -76,9 +76,8 @@ export function WatchParty({ room, onLeaveRoom }: WatchPartyProps) {
       setShowGuestWarning(true);
     }
 
-    // Force kick when session expires
+    // Force kick when session expires (modal shown by AuthContext)
     if (guestSession.timeRemaining === 0) {
-      alert('Your 90-minute guest session has expired. Please sign up for unlimited access!');
       onLeaveRoom();
     }
   }, [isGuest, guestSession, onLeaveRoom]);

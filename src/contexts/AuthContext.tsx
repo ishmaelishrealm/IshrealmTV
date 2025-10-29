@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase, hasSupabaseConfig } from '../lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
+import { SessionExpiredModal } from '../components/SessionExpiredModal';
 
 interface GuestSession {
   id: string;
@@ -44,6 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isGuest, setIsGuest] = useState(false);
   const [guestSession, setGuestSession] = useState<GuestSession | null>(null);
+  const [showExpiredModal, setShowExpiredModal] = useState(false);
 
   // Initialize guest session timer
   useEffect(() => {
@@ -212,7 +214,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsGuest(false);
     setGuestSession(null);
     localStorage.removeItem(GUEST_SESSION_KEY);
-    alert('Your guest session has expired. Please sign up for unlimited access!');
+    setShowExpiredModal(true);
+  };
+
+  const closeExpiredModal = () => {
+    setShowExpiredModal(false);
+    // Optionally redirect to home or show auth modal
   };
 
   const value = {
@@ -228,7 +235,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     upgradeGuestAccount
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+      <SessionExpiredModal
+        isOpen={showExpiredModal}
+        onClose={closeExpiredModal}
+        title="Guest Session Expired"
+        message="Your 90-minute guest session has ended. Sign up now for unlimited watch parties, video uploads, and more!"
+      />
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

@@ -87,22 +87,30 @@ export function RoomControls({ videoState, onStateChange }: RoomControlsProps) {
   return (
     <Card className="bg-black/40 border-pink-500/20 backdrop-blur-sm p-3 md:p-4">
       <div className="space-y-3 md:space-y-4">
-        {/* Progress Bar */}
-        <div className="flex items-center gap-2">
-          <span className="text-white/60 text-xs md:text-sm min-w-[35px] md:min-w-[40px]">
-            {formatTime(isSeeking ? seekPreview : videoState.currentTime)}
-          </span>
-          <Slider
-            value={[isSeeking ? seekPreview : videoState.currentTime]}
-            max={videoState.duration}
-            step={0.1}
-            onValueChange={handleSeekChange}
-            onValueCommit={handleSeekCommit}
-            className="flex-1"
-          />
-          <span className="text-white/60 text-xs md:text-sm min-w-[35px] md:min-w-[40px]">
-            {formatTime(videoState.duration)}
-          </span>
+        {/* Progress Bar / Seek Slider */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-white/70 text-xs font-medium">Seek / Timeline</span>
+            {isSeeking && (
+              <span className="text-pink-400 text-xs animate-pulse">Seeking...</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-white/60 text-xs md:text-sm min-w-[35px] md:min-w-[40px]">
+              {formatTime(isSeeking ? seekPreview : videoState.currentTime)}
+            </span>
+            <Slider
+              value={[isSeeking ? seekPreview : videoState.currentTime]}
+              max={videoState.duration}
+              step={0.1}
+              onValueChange={handleSeekChange}
+              onValueCommit={handleSeekCommit}
+              className="flex-1"
+            />
+            <span className="text-white/60 text-xs md:text-sm min-w-[35px] md:min-w-[40px]">
+              {formatTime(videoState.duration)}
+            </span>
+          </div>
         </div>
 
         {/* Controls */}
@@ -189,18 +197,19 @@ export function RoomControls({ videoState, onStateChange }: RoomControlsProps) {
               )}
             </div>
 
-            {/* Volume - Hidden on small mobile, shown on larger screens */}
-            <div className="hidden sm:flex items-center gap-2 ml-2">
+            {/* Volume Control - Hidden on small mobile, shown on larger screens */}
+            <div className="hidden sm:flex items-center gap-2 ml-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10">
+              <span className="text-white/70 text-xs font-medium whitespace-nowrap">Volume:</span>
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={toggleMute}
-                className="hover:bg-white/10 h-10 w-10 p-0"
+                className="hover:bg-white/10 h-8 w-8 p-0"
               >
                 {muted ? (
-                  <VolumeX className="w-5 h-5" />
+                  <VolumeX className="w-4 h-4" />
                 ) : (
-                  <Volume2 className="w-5 h-5" />
+                  <Volume2 className="w-4 h-4" />
                 )}
               </Button>
               <Slider
@@ -210,7 +219,7 @@ export function RoomControls({ videoState, onStateChange }: RoomControlsProps) {
                 onValueChange={(value: number[]) => setVolume(value[0])}
                 className="w-20 md:w-24"
               />
-              <span className="text-white/60 text-xs min-w-[35px]">{muted ? 0 : volume}%</span>
+              <span className="text-white/60 text-xs min-w-[35px] font-medium">{muted ? 0 : volume}%</span>
             </div>
           </div>
 
