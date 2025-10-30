@@ -1,4 +1,4 @@
-import { Tv2, Home, LogOut, User, Download, Menu, X } from "lucide-react";
+import { Home, LogOut, User, Download, Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -26,9 +26,13 @@ export function Navbar({ currentView, setCurrentView, inRoom, onLeaveRoom }: Nav
           {/* Logo - Mobile Optimized */}
           <button 
             onClick={() => setCurrentView("home")}
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 md:gap-3 hover:opacity-80 transition-opacity"
           >
-            <Tv2 className="w-6 h-6 md:w-8 md:h-8 text-pink-400" />
+            <img 
+              src="/ishrealmtvlogo.png" 
+              alt="ISHREALM TV Logo" 
+              className="w-8 h-8 md:w-10 md:h-10 object-contain drop-shadow-[0_0_8px_rgba(236,72,153,0.5)]"
+            />
             <div className="flex flex-col">
               <span className="text-lg md:text-2xl tracking-wider bg-gradient-to-r from-pink-400 to-green-400 bg-clip-text text-transparent">
                 ISHREALM TV

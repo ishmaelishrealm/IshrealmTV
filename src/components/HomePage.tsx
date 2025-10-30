@@ -85,34 +85,70 @@ export function HomePage({ setCurrentView }: HomePageProps) {
 
         {/* Feature Cards */}
         <div className="grid md:grid-cols-3 gap-4 md:gap-6 pt-8 md:pt-16 px-4">
-          <Card className="bg-black/40 border-pink-500/20 backdrop-blur-sm p-5 md:p-6 space-y-3 hover:border-pink-500/40 transition-all">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-pink-500/10 rounded-lg flex items-center justify-center border border-pink-500/20">
-              <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-pink-400" />
+          <Card className="relative bg-black/40 border-pink-500/20 backdrop-blur-sm p-5 md:p-6 space-y-3 hover:border-pink-500/40 transition-all overflow-hidden group">
+            {/* Logo Background */}
+            <div 
+              className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-500"
+              style={{
+                backgroundImage: `url('/ishrealmtvlogo.png')`,
+                backgroundSize: '120%',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+              }}
+            />
+            <div className="relative z-10">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-pink-500/10 rounded-lg flex items-center justify-center border border-pink-500/20">
+                <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-pink-400" />
+              </div>
+              <h3 className="text-white">Instant Sync</h3>
+              <p className="text-white/60 text-sm">
+                Real-time playback sync. Everyone watches at the exact same moment.
+              </p>
             </div>
-            <h3 className="text-white">Instant Sync</h3>
-            <p className="text-white/60 text-sm">
-              Real-time playback sync. Everyone watches at the exact same moment.
-            </p>
           </Card>
           
-          <Card className="bg-black/40 border-green-500/20 backdrop-blur-sm p-5 md:p-6 space-y-3 hover:border-green-500/40 transition-all">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-green-500/10 rounded-lg flex items-center justify-center border border-green-500/20">
-              <Users className="w-5 h-5 md:w-6 md:h-6 text-green-400" />
+          <Card className="relative bg-black/40 border-green-500/20 backdrop-blur-sm p-5 md:p-6 space-y-3 hover:border-green-500/40 transition-all overflow-hidden group">
+            {/* Logo Background */}
+            <div 
+              className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-500"
+              style={{
+                backgroundImage: `url('/ishrealmtvlogo.png')`,
+                backgroundSize: '120%',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+              }}
+            />
+            <div className="relative z-10">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-green-500/10 rounded-lg flex items-center justify-center border border-green-500/20">
+                <Users className="w-5 h-5 md:w-6 md:h-6 text-green-400" />
+              </div>
+              <h3 className="text-white">Guest Mode</h3>
+              <p className="text-white/60 text-sm">
+                Join instantly as a guest with 90 minutes free per day. No account needed.
+              </p>
             </div>
-            <h3 className="text-white">Guest Mode</h3>
-            <p className="text-white/60 text-sm">
-              Join instantly as a guest with 90 minutes free per day. No account needed.
-            </p>
           </Card>
           
-          <Card className="bg-black/40 border-pink-500/20 backdrop-blur-sm p-5 md:p-6 space-y-3 hover:border-pink-500/40 transition-all md:col-span-1 col-span-1">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-pink-500/10 rounded-lg flex items-center justify-center border border-pink-500/20">
-              <Plus className="w-5 h-5 md:w-6 md:h-6 text-pink-400" />
+          <Card className="relative bg-black/40 border-pink-500/20 backdrop-blur-sm p-5 md:p-6 space-y-3 hover:border-pink-500/40 transition-all md:col-span-1 col-span-1 overflow-hidden group">
+            {/* Logo Background */}
+            <div 
+              className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-500"
+              style={{
+                backgroundImage: `url('/ishrealmtvlogo.png')`,
+                backgroundSize: '120%',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+              }}
+            />
+            <div className="relative z-10">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-pink-500/10 rounded-lg flex items-center justify-center border border-pink-500/20">
+                <Plus className="w-5 h-5 md:w-6 md:h-6 text-pink-400" />
+              </div>
+              <h3 className="text-white">Multiple Platforms</h3>
+              <p className="text-white/60 text-sm">
+                YouTube, Twitch, and more. Watch content from your favorite platforms.
+              </p>
             </div>
-            <h3 className="text-white">Multiple Platforms</h3>
-            <p className="text-white/60 text-sm">
-              YouTube, Twitch, and more. Watch content from your favorite platforms.
-            </p>
           </Card>
         </div>
       </div>
