@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Youtube, Twitch, Upload, ArrowLeft, Copy, Check, FileVideo, AlertTriangle, Loader2 } from "lucide-react";
+import { Youtube, Twitch, Upload, ArrowLeft, Copy, Check, FileVideo, AlertTriangle, Loader2, Lock } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Input } from "./ui/input";
@@ -243,27 +243,40 @@ export function CreateRoom({ onCreateRoom, onBack }: CreateRoomProps) {
               </button>
 
               <button
-                onClick={() => setPlatform("local")}
-                className={`p-3 md:p-4 rounded-lg border-2 transition-all touch-manipulation ${
-                  platform === "local"
-                    ? "border-pink-500 bg-pink-500/20"
-                    : "border-white/20 bg-white/5 hover:border-white/40"
-                }`}
+                onClick={() => {
+                  // Disabled for now - Premium feature coming soon
+                }}
+                disabled
+                className="relative p-3 md:p-4 rounded-lg border-2 transition-all touch-manipulation border-white/10 bg-black/40 backdrop-blur-sm cursor-not-allowed overflow-hidden group"
               >
-                <FileVideo className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 text-pink-400" />
-                <p className="text-xs md:text-sm text-white">Upload File</p>
+                {/* Animated gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 via-pink-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                {/* Lock icon with glow */}
+                <div className="relative flex flex-col items-center">
+                  <div className="relative mb-2">
+                    <FileVideo className="w-6 h-6 md:w-8 md:h-8 text-white/30" />
+                    <div className="absolute -top-1 -right-1 bg-gradient-to-br from-yellow-400 to-pink-500 rounded-full p-1 shadow-lg shadow-yellow-500/50 animate-pulse">
+                      <Lock className="w-3 h-3 md:w-4 md:h-4 text-black" />
+                    </div>
+                  </div>
+                  <p className="text-xs md:text-sm text-white/40 mb-1">Upload File</p>
+                  <div className="px-2 py-0.5 bg-gradient-to-r from-yellow-400/20 to-pink-500/20 border border-yellow-400/30 rounded-full">
+                    <p className="text-[10px] md:text-xs font-semibold bg-gradient-to-r from-yellow-300 to-pink-400 bg-clip-text text-transparent">
+                      Coming Soon
+                    </p>
+                  </div>
+                </div>
+
+                {/* Shimmer effect */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+                </div>
               </button>
             </div>
-            {hasSupabaseConfig ? (
-              <p className="text-xs text-green-400/70 text-center flex items-center justify-center gap-2">
-                <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                Video uploads enabled (Free during testing)
-              </p>
-            ) : (
-              <p className="text-xs text-yellow-400/70 text-center">
-                💡 Tip: Add Supabase config to enable video uploads
-              </p>
-            )}
+            <p className="text-xs text-white/50 text-center">
+              💡 Use YouTube or hosted video URLs for best sync performance
+            </p>
           </div>
 
           {/* URL Input */}
